@@ -13,6 +13,7 @@ const userSchema = new Schema(
       type: String,
       required: true,
       unique: true,
+      //match option is a type of validation that allows us to use regex to test the input value.
       match: [/.+@.+\..+/, 'Must match an email address!']
     },
     password: {
@@ -40,6 +41,7 @@ const userSchema = new Schema(
   }
 );
 
+// password hashing using the bcrypt library.
 // set up pre-save middleware to create password
 userSchema.pre('save', async function(next) {
   if (this.isNew || this.isModified('password')) {
