@@ -5,6 +5,9 @@ const { ApolloServer } = require('apollo-server-express');
 // import our typeDefs and resolvers 
 const { typeDefs, resolvers } = require('./schemas');
 
+// middleware from auth.js 
+const { authMiddleware }  = require('./utiles/auth');
+
 // the moongoose connection is in config file 
 const db = require('./config/connection');
 
@@ -13,7 +16,9 @@ const app = express();
 //create a new Apollo server and pass in our schema data inside of express server 
 const server = new ApolloServer ({
   typeDefs,
-  resolvers
+  resolvers, 
+  //adding contex of auth being passed from auth.js This ensures that every request performs an authentication check, and the updated request object will be passed to the resolvers as the context.
+  context: authMiddleware 
 });
 
 // integrate our Apollo server with the Express application as middleware 
@@ -29,30 +34,3 @@ db.once('open', () => {
     console.log(`Use GraphQL at http://localhost:${PORT}${server.graphqlPath}`);
   });
 });
-const { User, Thought } = require('../models');
-
-const resolvers = {
-  Query: {
-    users: async () => {
-      return User.find()
-        .select('-__v -password')
-        .populate('thoughts')
-        .populate('friends');
-    },
-    user: async (parent, { username }) => {
-      return User.findOne({ username })
-        .select('-__v -password')
-        .populate('friends')
-        .populate('thoughts');
-    },
-    thoughts: async (parent, { username }) => {
-      const params = username ? { username } : {};
-      return Thought.find(params).sort({ createdAt: -1 });
-    },
-    thought: async (parent, { _id }) => {
-      return Thought.findOne({ _id });
-    }
-  }
-};
-
-module.exports = resolvers;
