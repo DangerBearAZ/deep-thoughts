@@ -63,6 +63,21 @@ const resolvers = {
       const token = signToken(user); 
       return { token, user };
 
+    },
+    //Only logged-in users should be able to use this mutation, hence why we check for the existence of context.user first
+    addThought: async (parents, args, context) => {
+      if (context.user) {
+        const thought = await Thought.create({...args, username: context.user.username});
+
+        await User.findByIdAndUpdate(
+          {_id: context.user._id }, 
+          { $push: { thoughts: thought._id } },
+          // without the { new: true } flag Mongo would return the original document instead of the updated document.
+          { new: true }
+        );
+        return thought;
+      }
+      throw new AuthenticationError("You need to be logged in!");
     }
   }
 };

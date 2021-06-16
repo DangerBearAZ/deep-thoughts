@@ -2,11 +2,12 @@ const express = require('express');
 
 // import ApolloServer 
 const { ApolloServer } = require('apollo-server-express');
+const path = require('path');
 // import our typeDefs and resolvers 
 const { typeDefs, resolvers } = require('./schemas');
 
 // middleware from auth.js 
-const { authMiddleware }  = require('./utiles/auth');
+const { authMiddleware } = require('./utils/auth');
 
 // the moongoose connection is in config file 
 const db = require('./config/connection');
@@ -18,7 +19,7 @@ const server = new ApolloServer ({
   typeDefs,
   resolvers, 
   //adding contex of auth being passed from auth.js This ensures that every request performs an authentication check, and the updated request object will be passed to the resolvers as the context.
-  context: authMiddleware 
+  context: authMiddleware
 });
 
 // integrate our Apollo server with the Express application as middleware 
